@@ -30,13 +30,16 @@ import kotlin.collections.map
 import kotlin.collections.orEmpty
 import kotlin.toString
 
+val USERS = "Users"
+val POSTS = "Posts"
+
+
 @HiltViewModel
 class InstaViewModel @Inject constructor(
     val auth: FirebaseAuth,
     val store: FirebaseFirestore
 ) : ViewModel() {
-        val USERS = "Users"
-        val POSTS = "Posts"
+
         val post = MutableLiveData<Posts>()
         val inProgress = mutableStateOf(false)
         var signedIn = mutableStateOf(false)

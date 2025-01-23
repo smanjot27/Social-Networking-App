@@ -1,10 +1,6 @@
 package com.example.instagram.utils
 
-import android.net.Uri
 import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,264 +15,258 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.example.instagram.InstaViewModel
-import com.example.instagram.R
 import com.example.instagram.data.Posts
+import com.example.instagram.data.User
 import kotlinx.coroutines.delay
-
+import com.example.instagram.R
 @Composable
 fun MyPostScreen(navController: NavController, viewModel: InstaViewModel) {
+    var selectedItem by remember { mutableStateOf("Posts") }
     val currUser = viewModel.userData.value
-    val posts = viewModel.currUserposts.value
-
 
     Log.i("Instagram check", "$currUser")
-    Scaffold(topBar = {
-        CustomTopBar(navController = navController, viewModel = viewModel,false)
-    },
+
+    Scaffold(
+        topBar = {
+            CustomTopBar(navController = navController, viewModel = viewModel, false)
+        },
         bottomBar = {
-            BottomNavigation(navController, active = "Posts")
+            BottomNavigationBar( selectedItem, onItemSelected = {
+                selectedItem = it
+                navController.navigate(route = it)
+            })
         }
-    ) { it ->
-        //FULL SCREEN
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(it),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            //PROFILE PIC POST COUNT FOLLOWERS FOLLOWINGS
-            Row(
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 0.dp)
+    ) { paddingValues ->
+        if(!viewModel.inProgress.value) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(Color.White)
             ) {
-
-                ShowProfilePic(currUser?.image, navController, viewModel)
-                Row(
-                    modifier = Modifier
-                        .padding(top = 20.dp, start = 20.dp)
-                        .fillMaxWidth(0.9f),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Column {
-                        Text(
-                            "${if (currUser?.postCount != null) currUser.postCount else 0}",
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.width(60.dp)
-                        )
-                        Spacer(Modifier.size(5.dp))
-                        Text(
-                            text = "Posts",
-                            fontSize = 18.sp,
-                            textAlign = TextAlign.Center,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.width(60.dp)
-                        )
-                    }
-
-                    Column {
-                        Text(
-                            "${if (currUser?.Following != null) currUser.Following?.size else 0}",
-                            fontSize = 18.sp,
-                            modifier = Modifier.width(90.dp),
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(Modifier.size(5.dp))
-                        Text(
-                            text = "Followings",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.width(90.dp),
-                            textAlign = TextAlign.Center
-                        )
-                    }
-
-                    Column {
-                        Text(
-                            "${if (currUser?.Followers != null) currUser.Followers?.size else 0}",
-                            fontSize = 18.sp,
-                            modifier = Modifier.width(90.dp),
-                            textAlign = TextAlign.Center
-                        )
-                        Spacer(Modifier.size(5.dp))
-                        Text(
-                            text = "Followers",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.width(90.dp),
-                            textAlign = TextAlign.Center
-                        )
-
-                    }
-                }
+                // Profile Section
+                ProfileSection(currUser)
+                Spacer(modifier = Modifier.height(16.dp))
+                // Edit and Contact Buttons
+                EditAndContactButtons(navController)
+                Spacer(modifier = Modifier.height(16.dp))
+                // Segmented Controls
+                //SegmentedControls()
+                Spacer(modifier = Modifier.height(16.dp))
+                // Grid Section
+                ImageGrid(currUser, viewModel, navController)
             }
-            Spacer(Modifier.size(10.dp))
-            //USERNAME NAME BIO EDIT BUTTON
-            Column(Modifier.fillMaxWidth(0.9f)) {
-                Text(
-                    "${if (currUser?.Name != "null") currUser?.Name else " "}",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+        }else {
+            Spinner()
+        }
+    }
+}
+
+@Composable
+fun ProfileSection(currUser: User?) {
+    val isPicVisible = remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(1000L)
+        isPicVisible.value = true
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Profile Picture
+        if (isPicVisible.value) {
+            if (currUser?.image != "null") {
+                Image(
+                    painter = rememberAsyncImagePainter(getImage()), // Replace with a valid image URL
+                    contentDescription = "Profile Picture",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
-                Text("@${currUser?.userName}", fontSize = 18.sp)
-                Text("${if (currUser?.BIO != "null") currUser?.BIO else " "}", fontSize = 16.sp)
-                Spacer(Modifier.size(10.dp))
-                OutlinedButton(
-                    onClick = {
-                        navController.navigate("EditProfile")
-                    },
-                    shape = RoundedCornerShape(0.dp),
-                    modifier = Modifier
-                        .height(35.dp)
-                        .fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(colorResource(R.color.white)),
-                ) { Text(text = "Edit Profile", color = Color.Black) }
-            }
-            //POSTS
-            if (currUser?.postCount!=null && currUser.postCount?.toInt()!! > 0 && posts.isNotEmpty()) {
-                LazyVerticalGrid(
-                    modifier = Modifier.fillMaxWidth(0.9f),
-                    contentPadding = PaddingValues(top = 5.dp),
-                    columns = GridCells.Fixed(3)
-                ) {
-                    items(count = posts.size , itemContent = { index ->
-                        val post = posts[index]
-                        Log.i("Instagram Check :","Post showing $post")
-                        Image(
-                            painter = painterResource(getImage()), contentDescription = "",
-                            contentScale = ContentScale.FillBounds,
-                            modifier = Modifier
-                                .height(300.dp)
-                                .padding(3.dp)
-                                .clickable {
-                                    viewModel.post.value = post as Posts?
-                                    navController.navigate(route = "ViewPost")
-                                }
-
-                        )
-
-                    })
-                }
             } else {
-                Box(Modifier.fillMaxSize(0.9f), contentAlignment = Alignment.Center) {
-                    Text("No Content Posted", color = Color.Gray, fontSize = 24.sp)
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = "",
+                    modifier = Modifier.size(80.dp).clip(CircleShape),
+                    tint = Color.Black
+                )
+            }
+        }else {
+            OutlinedCard(
+                shape = CircleShape,
+                modifier = Modifier
+                    .size(80.dp).align(Alignment.CenterHorizontally)
+
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(modifier = Modifier.size(30.dp))
                 }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        // Username
+        Text(
+            text = if(currUser!=null) currUser.userName else "",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        // Bio
+        Text(
+            text = if (currUser!=null)
+                if(currUser.BIO!="null") currUser.BIO else "" else {
+                ""
+            },
+            fontSize = 14.sp,
+            color = Color.Gray
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "${if (currUser?.Following != null) currUser.Following?.size else 0}",
+                    fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(text = "Following", fontSize = 14.sp, color = Color.Gray)
+            }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(text = "${if (currUser?.Followers != null) currUser.Followers?.size else 0}",
+                    fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(text = "Followers", fontSize = 14.sp, color = Color.Gray)
             }
         }
     }
 }
 
 @Composable
-fun ShowProfilePic(image: String?, navController: NavController, viewModel: InstaViewModel) {
-    val imageUri = remember { mutableStateOf<Uri?>(if (image != null) Uri.parse(image) else null) }
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        imageUri.value = uri
-        if (imageUri.value != null) {
-            navController.navigate(route = "CreatePost")
-        } else {
-            viewModel.HandleException(custom = "No image selected. Select an image to create the post")
-        }
-    }
-    val isPicVisible = remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        delay(1000L)
-        isPicVisible.value = true
-    }
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.clickable {
-            launcher.launch("image/*")
-
-        }
+fun EditAndContactButtons(navController: NavController) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        if (isPicVisible.value) {
-            OutlinedCard(shape = CircleShape) {
-                if (image != "null") {
-                    Log.i("Instagram Check", "image : $image  imageUri : $imageUri")
-                    AsyncImage(
-                        model = getImage(), contentDescription = "",
-                        modifier = Modifier
-                            .size(100.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.FillBounds
-                    )
-                } else {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = "",
-                        modifier = Modifier.size(100.dp),
-                        tint = Color.Black
-                    )
-                }
-            }
+        Button(
+            onClick = { navController.navigate("EditProfile") },
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+            shape = RoundedCornerShape(50),
+            modifier = Modifier.weight(1f).padding(end = 8.dp)
+        ) {
+            Text(text = "Edit Profile")
+        }
+//        Button(
+//            onClick = { /*TODO*/ },
+//            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+//            shape = RoundedCornerShape(50),
+//            modifier = Modifier.weight(1f).padding(start = 8.dp)
+//        ) {
+//            Text(text = "Contact", color = Color.White)
+//        }
+    }
+}
 
-            OutlinedCard(
-                shape = CircleShape,
-                modifier = Modifier
-                    .size(30.dp)
-                    .align(alignment = Alignment.BottomEnd),
-                border = BorderStroke(2.dp, Color.White)
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "",
+@Composable
+fun SegmentedControls() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Icon(
+            Icons.Default.Person,
+            contentDescription = "Grid View",
+            modifier = Modifier.size(24.dp)
+        )
+        Icon(
+            Icons.Default.Person,
+            contentDescription = "List View",
+            modifier = Modifier.size(24.dp)
+        )
+        Icon(
+            Icons.Default.Person,
+            contentDescription = "Other View",
+            modifier = Modifier.size(24.dp)
+        )
+    }
+}
+
+@Composable
+fun ImageGrid(currUser: User?, viewModel: InstaViewModel, navController: NavController) {
+    val posts = remember { viewModel.currUserposts.value}
+    val items = remember {
+        List(posts.size) { (100..300).random().dp } // Random heights, but fixed during the lifecycle
+    }
+
+    if (currUser?.postCount!=null && currUser.postCount?.toInt()!! > 0 && posts.isNotEmpty() && posts.size>0)
+    {
+        LazyVerticalStaggeredGrid(
+            modifier = Modifier.padding(start=5.dp,end=5.dp).fillMaxSize(),
+            columns = StaggeredGridCells.Fixed(2), // Dynamically adapt columns based on screen width
+            contentPadding = PaddingValues(0.dp),
+            verticalItemSpacing = 8.dp,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(posts.size) { index ->
+                val post = posts[index]
+                Box(
                     modifier = Modifier
-                        .size(50.dp)
-                        .background(Color.Blue),
-                    tint = Color.White
-                )
-            }
-        } else {
-            OutlinedCard(
-                shape = CircleShape,
-                modifier = Modifier
-                    .size(100.dp)
-                    .align(alignment = Alignment.Center),
-
+                        .height(items[index])
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.LightGray)
                 ) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(modifier = Modifier.size(30.dp))
+                    Image(
+                        painter = rememberAsyncImagePainter(getImage()),
+                        contentDescription = "Grid Image $index",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clickable {
+                            viewModel.post.value = post as Posts?
+                            navController.navigate(route = "ViewPost")
+                        }
+                    )
                 }
             }
         }
+    }else{
+        Box(Modifier.fillMaxSize(0.9f), contentAlignment = Alignment.Center) {
+            Text("No Content Posted", color = Color.Gray, fontSize = 24.sp)
+        }
     }
-
 }
 
 fun getImage(): Int {

@@ -1,5 +1,8 @@
 package com.example.instagram.utils
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,7 +13,11 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.InsertPhoto
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -18,6 +25,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +45,16 @@ import java.time.LocalDateTime
 @Composable
 fun CreatePostScreen(navController: NavController,viewModel: InstaViewModel){
     var caption = rememberSaveable { mutableStateOf("") }
+    val image = remember { mutableStateOf("") }
+    val imageUri = remember { mutableStateOf<Uri?>(if(image.value!=null) Uri.parse(image.value) else null) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        imageUri.value = uri
+        image.value = uri.toString()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -75,16 +93,36 @@ fun CreatePostScreen(navController: NavController,viewModel: InstaViewModel){
     ){
         Column(Modifier.fillMaxSize().padding(it),
             horizontalAlignment = Alignment.CenterHorizontally){
-            AsyncImage(
-                model = getImage(),
-                contentDescription = "",
-                Modifier
-                    .fillMaxHeight(0.4f).fillMaxWidth(0.6f)
-                    .padding(20.dp)
-                    .border(1.dp, Color.Black)
-                    .background(Color.Gray),
-                contentScale = ContentScale.FillBounds
-            )
+            if (image.value!="") {
+                AsyncImage(
+                    model = getImage(),
+                    contentDescription = "",
+                    Modifier
+                        .fillMaxHeight(0.4f).fillMaxWidth(0.6f)
+                        .padding(20.dp)
+                        .border(1.dp, Color.Black)
+                        .background(Color.Gray),
+                    contentScale = ContentScale.FillBounds
+                )
+            }else{
+                IconButton(
+                    onClick = { launcher.launch("image/*") },
+                    Modifier
+                        .fillMaxHeight(0.4f)
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                        .border(1.dp, Color.Black)
+                        .background(Color.Gray)
+                ) {
+                    Icon(
+                        Icons.Default.InsertPhoto,
+                        contentDescription = "",
+                        Modifier
+                            .fillMaxHeight(0.8f)
+                            .fillMaxWidth()
+                    )
+                }
+            }
             TextField(
                 value = caption.value,
                 onValueChange = { caption.value = it },

@@ -22,8 +22,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +44,8 @@ import kotlinx.coroutines.delay
 @Composable
 fun SearchScreen(navController: NavController, viewModel: InstaViewModel) {
 
+    var selectedItem by remember { mutableStateOf("Search") }
+
     val searchKeyword = remember { mutableStateOf("") }
     val searchedPost = viewModel.searchedposts.value
     val showResults = remember { mutableStateOf(false) }
@@ -56,8 +60,10 @@ fun SearchScreen(navController: NavController, viewModel: InstaViewModel) {
     Scaffold(topBar = {
         CustomTopBar(navController = navController, viewModel = viewModel, false)
     }, bottomBar = {
-        BottomNavigation(navController, active = "Search")
-    }) { it ->
+        BottomNavigationBar( selectedItem, onItemSelected = {
+            selectedItem = it
+            navController.navigate(route = it)
+        })    }) { it ->
         Column(
             Modifier
                 .fillMaxSize()

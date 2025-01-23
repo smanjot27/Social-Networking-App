@@ -39,10 +39,12 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +68,7 @@ fun SinglePostScreen(navController: NavController, viewModel: InstaViewModel) {
     val post = viewModel.post.observeAsState()
     val image = remember { mutableStateOf(post.value?.userProfileImage) }
     val coroutine = rememberCoroutineScope()
+    var selectedItem by remember { mutableStateOf("ViewPost") }
     val btnText =
         remember { mutableStateOf(if (viewModel.isFollowing(post.value?.uid)) "Following" else "Follow") }
     val isFavourite = remember {
@@ -100,8 +103,10 @@ fun SinglePostScreen(navController: NavController, viewModel: InstaViewModel) {
         CustomTopBar(navController = navController, viewModel = viewModel, true)
     },
         bottomBar = {
-        BottomNavigation(navController, active = "Posts")
-    }
+            BottomNavigationBar( selectedItem, onItemSelected = {
+                selectedItem = it
+                navController.navigate(route = it)
+            })    }
     ) {
         Column(
             Modifier

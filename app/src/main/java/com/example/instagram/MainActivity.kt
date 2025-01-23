@@ -56,7 +56,7 @@ fun InstaApp() {
             SignInScreen(navController, vm)
         }
         composable(route = "Feed") {
-            FeedScreen(navController, vm)
+           FeedScreen(navController, vm)
         }
         composable(route = "Search") {
             SearchScreen(navController, vm)
