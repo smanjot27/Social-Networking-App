@@ -3,6 +3,7 @@ package com.example.instagram.utils
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,24 +11,32 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,15 +49,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.instagram.InstaViewModel
+import com.example.instagram.R
 import com.example.instagram.data.Posts
 import com.example.instagram.data.User
 import kotlinx.coroutines.delay
-import com.example.instagram.R
+
 @Composable
 fun MyPostScreen(navController: NavController, viewModel: InstaViewModel) {
     var selectedItem by remember { mutableStateOf("Posts") }
@@ -58,16 +69,17 @@ fun MyPostScreen(navController: NavController, viewModel: InstaViewModel) {
 
     Scaffold(
         topBar = {
-            CustomTopBar(navController = navController, viewModel = viewModel, false)
+            ProfileTopBar(currUser, viewModel)
         },
         bottomBar = {
-            BottomNavigationBar( selectedItem, onItemSelected = {
+            BottomNavigationBar(selectedItem, onItemSelected = {
                 selectedItem = it
                 navController.navigate(route = it)
             })
-        }
+        },        containerColor = Color(0xFFF7F7F7)
+
     ) { paddingValues ->
-        if(!viewModel.inProgress.value) {
+        if (!viewModel.inProgress.value) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -86,11 +98,47 @@ fun MyPostScreen(navController: NavController, viewModel: InstaViewModel) {
                 // Grid Section
                 ImageGrid(currUser, viewModel, navController)
             }
-        }else {
+        } else {
             Spinner()
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProfileTopBar(currUser: User?, viewModel: InstaViewModel) {
+    TopAppBar(
+        title = {
+            Text(
+                if (currUser != null && currUser.userName != "null") currUser.userName else "",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        },
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = Color.White,
+            contentColorFor(Color.Black)
+        ),
+        windowInsets = WindowInsets.statusBars,
+        actions = {
+            IconButton(
+                onClick = {
+                    viewModel.SignOut()
+                },
+            ) {
+                Icon(
+                    Icons.Filled.Logout,
+                    contentDescription = "",
+                    tint = Color.Black,
+                )
+            }
+        },
+        modifier = Modifier.clip(RoundedCornerShape(20.dp))
+    )
+}
+
 
 @Composable
 fun ProfileSection(currUser: User?) {
@@ -114,18 +162,19 @@ fun ProfileSection(currUser: User?) {
                     contentDescription = "Profile Picture",
                     modifier = Modifier
                         .size(80.dp)
-                        .clip(CircleShape),
+                        .clip(CircleShape).border(3.dp, Color.Gray, CircleShape).padding(3.dp),
                     contentScale = ContentScale.Crop
                 )
             } else {
                 Icon(
                     Icons.Default.Person,
                     contentDescription = "",
-                    modifier = Modifier.size(80.dp).clip(CircleShape),
+                    modifier = Modifier.size(80.dp).clip(CircleShape)
+                        .border(3.dp, Color.Gray, CircleShape).padding(3.dp),
                     tint = Color.Black
                 )
             }
-        }else {
+        } else {
             OutlinedCard(
                 shape = CircleShape,
                 modifier = Modifier
@@ -140,15 +189,15 @@ fun ProfileSection(currUser: User?) {
         Spacer(modifier = Modifier.height(8.dp))
         // Username
         Text(
-            text = if(currUser!=null) currUser.userName else "",
+            text = if (currUser != null) currUser.userName else "",
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp
         )
         Spacer(modifier = Modifier.height(4.dp))
         // Bio
         Text(
-            text = if (currUser!=null)
-                if(currUser.BIO!="null") currUser.BIO else "" else {
+            text = if (currUser != null)
+                if (currUser.BIO != "null") currUser.BIO else "" else {
                 ""
             },
             fontSize = 14.sp,
@@ -160,13 +209,17 @@ fun ProfileSection(currUser: User?) {
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "${if (currUser?.Following != null) currUser.Following?.size else 0}",
-                    fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(
+                    text = "${if (currUser?.Following != null) currUser.Following?.size?.minus(1)  else 0}",
+                    fontWeight = FontWeight.Bold, fontSize = 16.sp
+                )
                 Text(text = "Following", fontSize = 14.sp, color = Color.Gray)
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = "${if (currUser?.Followers != null) currUser.Followers?.size else 0}",
-                    fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(
+                    text = "${if (currUser?.Followers != null) currUser.Followers?.size else 0}",
+                    fontWeight = FontWeight.Bold, fontSize = 16.sp
+                )
                 Text(text = "Followers", fontSize = 14.sp, color = Color.Gray)
             }
         }
@@ -200,43 +253,17 @@ fun EditAndContactButtons(navController: NavController) {
     }
 }
 
-@Composable
-fun SegmentedControls() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        Icon(
-            Icons.Default.Person,
-            contentDescription = "Grid View",
-            modifier = Modifier.size(24.dp)
-        )
-        Icon(
-            Icons.Default.Person,
-            contentDescription = "List View",
-            modifier = Modifier.size(24.dp)
-        )
-        Icon(
-            Icons.Default.Person,
-            contentDescription = "Other View",
-            modifier = Modifier.size(24.dp)
-        )
-    }
-}
 
 @Composable
 fun ImageGrid(currUser: User?, viewModel: InstaViewModel, navController: NavController) {
-    val posts = remember { viewModel.currUserposts.value}
+    val posts = remember { viewModel.currUserposts.value }
     val items = remember {
         List(posts.size) { (100..300).random().dp } // Random heights, but fixed during the lifecycle
     }
 
-    if (currUser?.postCount!=null && currUser.postCount?.toInt()!! > 0 && posts.isNotEmpty() && posts.size>0)
-    {
+    if (currUser?.postCount != null && currUser.postCount?.toInt()!! > 0 && posts.isNotEmpty() && posts.isNotEmpty()) {
         LazyVerticalStaggeredGrid(
-            modifier = Modifier.padding(start=5.dp,end=5.dp).fillMaxSize(),
+            modifier = Modifier.padding(start = 5.dp, end = 5.dp).fillMaxSize(),
             columns = StaggeredGridCells.Fixed(2), // Dynamically adapt columns based on screen width
             contentPadding = PaddingValues(0.dp),
             verticalItemSpacing = 8.dp,
@@ -262,7 +289,7 @@ fun ImageGrid(currUser: User?, viewModel: InstaViewModel, navController: NavCont
                 }
             }
         }
-    }else{
+    } else {
         Box(Modifier.fillMaxSize(0.9f), contentAlignment = Alignment.Center) {
             Text("No Content Posted", color = Color.Gray, fontSize = 24.sp)
         }

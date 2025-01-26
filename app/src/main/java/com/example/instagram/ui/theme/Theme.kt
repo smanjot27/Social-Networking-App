@@ -3,15 +3,18 @@ package com.example.instagram.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.colorResource
+import com.example.instagram.R
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -37,6 +40,7 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun InstagramTheme(
+
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -50,6 +54,17 @@ fun InstagramTheme(
 
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+
+    //val MystatusBarColor= if (darkTheme) colorResource(R.color.black) else colorResource(R.color.white)
+    val MystatusBarColor= colorResource(id = R.color.white)
+    val view = LocalView.current
+    if(!view.isInEditMode){
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor=MystatusBarColor.toArgb()
+            //WindowCompat.getInsetsController(window,view).isAppearanceLightStatusBars=darkTheme
+        }
     }
 
     MaterialTheme(

@@ -1,15 +1,18 @@
 package com.example.instagram.utils
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -31,12 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.instagram.InstaViewModel
-import com.example.instagram.R
 import com.example.instagram.data.Posts
 import kotlinx.coroutines.delay
 
@@ -46,88 +47,109 @@ fun SearchScreen(navController: NavController, viewModel: InstaViewModel) {
 
     var selectedItem by remember { mutableStateOf("Search") }
 
-    val searchKeyword = remember { mutableStateOf("") }
-    val searchedPost = viewModel.searchedposts.value
-    val showResults = remember { mutableStateOf(false) }
+    var searchKeyword by remember { mutableStateOf("") }
+    val searchedPost = remember { viewModel.searchedposts.value }
+    var showResults by remember { mutableStateOf(false) }
 
-    if (showResults.value) {
+    if (showResults) {
         LaunchedEffect(Unit) {
             delay(2000L)
-            showResults.value = false
+            showResults = false
         }
     }
 
-    Scaffold(topBar = {
-        CustomTopBar(navController = navController, viewModel = viewModel, false)
-    }, bottomBar = {
-        BottomNavigationBar( selectedItem, onItemSelected = {
+    Scaffold(bottomBar = {
+        BottomNavigationBar(selectedItem, onItemSelected = {
             selectedItem = it
             navController.navigate(route = it)
-        })    }) { it ->
+        })
+    }) { it ->
         Column(
             Modifier
                 .fillMaxSize()
                 .padding(it), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            TextField(value = searchKeyword.value,
-                onValueChange = {
-                    searchKeyword.value = it
-                    if (searchKeyword.value.length > 3) {
+            SearchBar(
+                searchKeyword, onValueChanged = {
+                    searchKeyword = it
+                    if (searchKeyword.length > 2) {
                         //call search function in vm
-                        showResults.value = true
-                        viewModel.searchRelatedPosts(searchKeyword.value.trim())
+                        showResults = true
+                        viewModel.searchRelatedPosts(searchKeyword.trim())
                     }
-                },
-                label = { Text("Type....", color = Color.Gray) },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = colorResource(R.color.light_gray),
-                    focusedTextColor = Color.Black,
-                ),
-                trailingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "")
-                },
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .padding(top = 10.dp)
-                    .clip(RoundedCornerShape(0.dp)),
-                shape = RoundedCornerShape(0.dp)
+                }, showResults
             )
-            if (showResults.value) {
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .height(2.dp), color = Color.Black
+            if (searchedPost.isNotEmpty()) {
+                ImageGrid(searchedPost, navController = navController, viewModel)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchBar(searchKeyword: String, onValueChanged: (String) -> Unit, showResults: Boolean) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        TextField(
+            value = searchKeyword,
+            onValueChange = onValueChanged,
+            placeholder = { Text("What are you thinking today?") },
+            leadingIcon = { Icon(Icons.Default.Search, "", tint = Color.Gray) },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color(0xFFF2F2F2), // Light gray background
+                focusedIndicatorColor = Color.Transparent, // Removes underline
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+            ),
+            shape = RoundedCornerShape(20.dp), // Curved edges
+            modifier = Modifier.fillMaxWidth()
+        )
+        if (showResults) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth().height(2.dp)
+                    .padding(horizontal = 16.dp),
+                color = Color.Black
+            )
+        }
+    }
+}
+
+@Composable
+fun ImageGrid(searchedPost: List<Posts>, navController: NavController, viewModel: InstaViewModel) {
+    val items = remember {
+        List(searchedPost.size) { (100..300).random().dp } // Random heights, but fixed during the lifecycle
+    }
+
+    LazyVerticalStaggeredGrid(
+        modifier = Modifier.padding(start = 5.dp, end = 5.dp).fillMaxSize(),
+        columns = StaggeredGridCells.Fixed(2), // Dynamically adapt columns based on screen width
+        contentPadding = PaddingValues(0.dp),
+        verticalItemSpacing = 8.dp,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(searchedPost.size) { index ->
+            val post = searchedPost[index]
+            Box(
+                modifier = Modifier
+                    .height(items[index])
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.LightGray)
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(getImage()),
+                    contentDescription = "Grid Image $index",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize().clickable {
+                        viewModel.post.value = post as Posts?
+                        navController.navigate(route = "ViewPost")
+                    }
                 )
             }
-
-            if (searchedPost.isNotEmpty()) {
-                LazyVerticalGrid(
-                    modifier = Modifier.fillMaxWidth(0.9f),
-                    contentPadding = PaddingValues(top = 5.dp),
-                    columns = GridCells.Fixed(3)
-                ) {
-                    items(count = searchedPost.size, itemContent = { index ->
-                        val post = searchedPost[index]
-                        Image(painter = painterResource(getImage()),
-                            contentDescription = "",
-                            contentScale = ContentScale.FillBounds,
-                            modifier = Modifier
-                                .height(300.dp)
-                                .padding(3.dp)
-                                .clickable {
-                                    viewModel.post.value = post as Posts?
-                                    navController.navigate(route = "ViewPost")
-                                }
-
-                        )
-
-                    })
-                }
-            }
-
         }
-
-
     }
 }
