@@ -1,10 +1,13 @@
 package com.example.instagram.auth
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,16 +18,28 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.instagram.InstaViewModel
+import com.example.instagram.R
 import com.example.instagram.ui.theme.customTextStyleMedium
 import com.example.instagram.ui.theme.customTextStyleSmall
 import com.example.instagram.utils.AddButton
 import com.example.instagram.utils.AddTextComposable
 import com.example.instagram.utils.AddTextfieldComposable
+import com.example.instagram.utils.ButtonComponent
+import com.example.instagram.utils.ClickableLoginTextComponent
 import com.example.instagram.utils.CustomTopBar
+import com.example.instagram.utils.HeadingTextComponent
+import com.example.instagram.utils.NormalTextComponent
+import com.example.instagram.utils.PasswordFieldComponent
 import com.example.instagram.utils.Spinner
+import com.example.instagram.utils.TextFieldComponent
+import CurvedHangingImages
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,69 +56,67 @@ fun SignInScreen(navController: NavController,viewModel: InstaViewModel) {
             }
         }
     }
-    Scaffold(topBar = {
-        CustomTopBar(navController = navController, viewModel = viewModel,false)
-    }) { it ->
+    Box(
+        modifier = Modifier.fillMaxSize()
+            .background(
+                Brush.radialGradient(
+                colors = listOf(
+                    Color(0xFFe2d1c3),
+                    Color(0xFFfdfcfb),
+                ),
+                radius = 300f
+
+            )))
+    {
+
         Column(
-            Modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(it),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(start = 16.dp, top = 42.dp, end = 24.dp, bottom = 12.dp) // Different paddings for each side
         ) {
-            AddTextComposable("Sign In to your account", customTextStyleMedium, {}, Modifier)
 
-            Spacer(Modifier.size(20.dp))
+            NormalTextComponent(value = stringResource(id = R.string.login))
+            HeadingTextComponent(value = stringResource(id = R.string.welcome))
+            Spacer(modifier = Modifier.height(40.dp))
 
-            AddTextfieldComposable(email.value,"Email",{email.value = it},false,true,{})
+            TextFieldComponent(email.value,labelValue = stringResource(id = R.string.email),
+                painterResource(id = R.drawable.message),
+                onTextChanged = {
+                    email.value = it
+                },
+                errorStatus = false
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            PasswordFieldComponent(password.value,
+                labelValue = stringResource(id = R.string.password),
+                painterResource(id = R.drawable.lock),
+                onTextChanged = {
+                    password.value = it
+                },
+                errorStatus = false
+            )
 
-            Spacer(Modifier.size(5.dp))
+            Spacer(modifier = Modifier.height(40.dp))
 
-            AddTextfieldComposable(
-                password.value,
-                "Password",
-                { password.value = it },
-                true,
-                showPassword.value,
-                { showPassword.value = !showPassword.value })
-
-            Spacer(Modifier.size(20.dp))
-
-            AddButton("Sign In",{
-                viewModel.SignIn(email.value.trim(),password.value)
-                if (viewModel.signedIn.value){
-                    navController.navigate(route = "Feed")
-                }
-            },Modifier)
-
-            Spacer(Modifier.size(25.dp))
-
-            Row {
-                AddTextComposable(
-                    "Don't have an account?.",
-                    customTextStyleSmall,
-                    { },
-                    modifier = Modifier
-                )
-                AddTextComposable(
-                    "Click here to Sign Up now",
-                    customTextStyleSmall,
-                    {
-                        try {
-                        navController.navigate(route="SignUp")
-                        }catch (e: IllegalStateException){
-                            viewModel.HandleException(e,"Cannot move to login page")
-                        }
-                    },
-                    modifier = Modifier
-                )
-            }
-
+            ButtonComponent(
+                value = stringResource(id = R.string.login),
+                onButtonClicked = {
+                    viewModel.SignIn(email.value.trim(),password.value)
+                    if (viewModel.signedIn.value){
+                        navController.navigate(route = "Feed")
+                    }
+                },
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            ClickableLoginTextComponent(tryingToLogin = false, onTextSelected = {
+                navController.navigate(route="SignUp")
+            })
+            Spacer(modifier = Modifier.height(40.dp))
+            CurvedHangingImages()
         }
         val loading = viewModel.inProgress.value
         if (loading) {
             Spinner()
         }
-
     }
 }
