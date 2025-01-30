@@ -79,133 +79,6 @@ import com.example.instagram.R
 import com.example.instagram.ui.theme.*
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomTopBar(navController: NavController, viewModel: InstaViewModel, back: Boolean) {
-    TopAppBar(
-        title = {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .background(color = Color.Transparent),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.instagram_logo),
-                    contentDescription = "",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(70.dp)
-                )
-                Text(
-                    text = "Instagram",
-                    color = Color.White,
-                    fontSize = 40.sp,
-                    fontFamily = FontFamily.Cursive,
-                    modifier = Modifier.padding(30.dp)
-                )
-            }
-        },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = colorResource(R.color.purple_500)
-        ),
-        actions = {
-            if (viewModel.signedIn.value) {
-                IconButton(
-                    onClick = {
-                        viewModel.SignOut()
-                        navController.navigate("SignIn")
-                    },
-                ) {
-                    Icon(
-                        Icons.Filled.Logout,
-                        contentDescription = "",
-                        tint = Color.White,
-                        modifier = Modifier.size(100.dp)
-                    )
-
-                }
-            }
-        },
-        navigationIcon = {
-            if (back) {
-                IconButton(
-                    onClick = {
-                        navController.popBackStack()
-                    },
-                ) {
-                    Icon(
-                        Icons.Filled.ArrowBack,
-                        contentDescription = "",
-                        tint = Color.White,
-                        modifier = Modifier.size(100.dp)
-                    )
-                }
-            }
-        }
-    )
-}
-
-@Composable
-fun AddTextComposable(
-    value: String,
-    textstyle: TextStyle,
-    onclick: () -> Unit,
-    modifier: Modifier
-) {
-    Text(
-        text = value,
-        style = textstyle,
-        modifier = modifier.clickable(onClick = onclick)
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddTextfieldComposable(
-    value: String,
-    label: String,
-    onValueChange: (String) -> Unit,
-    isPassword: Boolean = false,
-    showPassword: Boolean = false,
-    passwordBtnOnclick: () -> Unit
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label, color = Color.Gray) },
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.Transparent,
-            focusedTextColor = Color.Black,
-        ),
-        visualTransformation = if (!showPassword) PasswordVisualTransformation() else VisualTransformation.None,
-        keyboardOptions = if (isPassword) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions(
-            keyboardType = KeyboardType.Text
-        ),
-        trailingIcon = {
-            if (isPassword) {
-                val icon =
-                    if (!showPassword) Icons.Default.Visibility else Icons.Default.VisibilityOff
-                IconButton(onClick = passwordBtnOnclick) {
-                    Icon(icon, contentDescription = "")
-                }
-            }
-        }
-    )
-}
-
-@Composable
-fun AddButton(text: String, onClick: () -> Unit, modifier: Modifier) {
-    Button(
-        onClick = onClick,
-        shape = RoundedCornerShape(0.dp),
-        colors = ButtonDefaults.buttonColors(colorResource(R.color.purple_500)),
-        modifier = modifier.height(50.dp)
-    ) {
-        Text(text = text, fontSize = 18.sp)
-    }
-}
-
 @Composable
 fun NotificationMessage(vm: InstaViewModel) {
     var state = vm.popupnotification.value
@@ -261,7 +134,7 @@ fun BottomNavigationBar(
     }
 }
 
-//plk
+
 @Composable
 fun NormalTextComponent(value: String) {
     Text(
