@@ -1,22 +1,18 @@
 package com.example.instagram.auth
 
+import CurvedHangingImages
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -26,20 +22,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.instagram.InstaViewModel
 import com.example.instagram.R
-import com.example.instagram.ui.theme.customTextStyleMedium
-import com.example.instagram.ui.theme.customTextStyleSmall
-import com.example.instagram.utils.AddButton
-import com.example.instagram.utils.AddTextComposable
-import com.example.instagram.utils.AddTextfieldComposable
 import com.example.instagram.utils.ButtonComponent
 import com.example.instagram.utils.ClickableLoginTextComponent
-import com.example.instagram.utils.CustomTopBar
 import com.example.instagram.utils.HeadingTextComponent
 import com.example.instagram.utils.NormalTextComponent
 import com.example.instagram.utils.PasswordFieldComponent
 import com.example.instagram.utils.Spinner
 import com.example.instagram.utils.TextFieldComponent
-import CurvedHangingImages
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -79,12 +68,13 @@ fun SignInScreen(navController: NavController,viewModel: InstaViewModel) {
             HeadingTextComponent(value = stringResource(id = R.string.welcome))
             Spacer(modifier = Modifier.height(40.dp))
 
-            TextFieldComponent(email.value,labelValue = stringResource(id = R.string.email),
+            TextFieldComponent(email.value, labelValue = stringResource(id = R.string.email),
                 painterResource(id = R.drawable.message),
                 onTextChanged = {
                     email.value = it
                 },
-                errorStatus = false
+                errorStatus = false,
+                singleline = true
             )
             Spacer(modifier = Modifier.height(10.dp))
             PasswordFieldComponent(password.value,

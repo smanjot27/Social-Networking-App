@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -78,7 +77,6 @@ import androidx.navigation.NavController
 import com.example.instagram.InstaViewModel
 import com.example.instagram.R
 import com.example.instagram.ui.theme.*
-import androidx.compose.material3.*
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -282,14 +280,14 @@ fun NormalTextComponent(value: String) {
 }
 @Composable
 fun ButtonComponent(value: String, onButtonClicked: () -> Unit) {
-    Button(
+    /*Button(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(48.dp),
         onClick =onButtonClicked,
         contentPadding = PaddingValues(),
         colors = ButtonDefaults.buttonColors(Color.Transparent),
-        shape = RoundedCornerShape(50.dp),
+        shape = RoundedCornerShape(20.dp),
     ) {
         Box(
             modifier = Modifier
@@ -297,7 +295,7 @@ fun ButtonComponent(value: String, onButtonClicked: () -> Unit) {
                 .heightIn(48.dp)
                 .background(
                     color = Color.Black,
-                    shape = RoundedCornerShape(50.dp)
+                    shape = RoundedCornerShape(20.dp)
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -307,6 +305,21 @@ fun ButtonComponent(value: String, onButtonClicked: () -> Unit) {
                 color = Color.White,
                 fontWeight = FontWeight.Bold
             )
+        }
+    }*/
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Button(
+            onClick = onButtonClicked,
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+            shape = RoundedCornerShape(20),
+            modifier = Modifier.weight(1f).padding(end = 8.dp)
+        ) {
+            Text(text = value)
         }
     }
 }
@@ -329,10 +342,12 @@ fun HeadingTextComponent(value: String) {
 }
 
 @Composable
-fun TextFieldComponent(textValue:String,
-    labelValue: String, painterResource: Painter,
+fun TextFieldComponent(
+    textValue: String,
+    labelValue: String, painterResource: Painter?,
     onTextChanged: (String) -> Unit,
-    errorStatus: Boolean = false
+    errorStatus: Boolean = false,
+    singleline: Boolean
 ) {
     OutlinedTextField(
         modifier = Modifier
@@ -350,11 +365,13 @@ fun TextFieldComponent(textValue:String,
             unfocusedContainerColor = Color.Transparent
         ),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-        singleLine = true,
+        singleLine = singleline,
         value = textValue,
         onValueChange = onTextChanged,
         leadingIcon = {
-            Icon(painter = painterResource, contentDescription = null)
+            painterResource?.let{
+                Icon(painter = painterResource, contentDescription = null)
+            }
         },
         // TODO: change this to get value from view model
         isError = errorStatus

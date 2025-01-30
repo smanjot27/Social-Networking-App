@@ -543,47 +543,51 @@ class InstaViewModel @Inject constructor(
 
     }
 
-    fun retrieveComments(post: Posts?) {
+    fun retrieveComments() {
         postComments.value.clear()
         viewModelScope.launch {
+            inProgress.value = true
             var commentList: MutableList<Comment> = mutableListOf<Comment>()
             val document =
-                store.collection(POSTS).whereEqualTo("timestamp", post?.timestamp).get().await()
+                store.collection(POSTS).whereEqualTo("timestamp", post.value?.timestamp).get().await()
             if (!document.isEmpty) {
                 val postref = document.documents.first()
                 val r = postref.toObject(Posts::class.java)
                 if (r != null) {
                     commentList = r.comments
                 }
+                inProgress.value=false
             }
-            if (!commentList.isEmpty()) postComments.value = commentList.toMutableList()
+            if (!commentList.isEmpty()) {postComments.value = commentList.toMutableList()}
+            inProgress.value=false
         }
     }
 
     fun addComment(posts: Posts?, comment: String, timestamp: LocalDateTime) {
         val formattedDateTime = timestamp.format(formatter)
-        val commentObject = Comment(comment, userData.value?.userName.toString(), formattedDateTime)
+        val commentObject = Comment(comment, userData.value?.userName.toString(), formattedDateTime, userData.value?.image.toString())
         viewModelScope.launch {
+            inProgress.value=true
             val document =
                 store.collection(POSTS).whereEqualTo("timestamp", posts?.timestamp).get().await()
             if (!document.isEmpty) {
                 val postref = document.documents.first()
-                postref.reference.update("comments", FieldValue.arrayUnion(commentObject))
-                    .addOnSuccessListener {
-                        HandleException(custom = "Data Updated Successfully")
-                    }.addOnFailureListener {
-                        HandleException(it, "cannot create user")
-                    }
-
-                store.collection(POSTS).document(postref.reference.id).get().addOnSuccessListener {
-                    post.value = it.toObject(Posts::class.java)
-                }
+                postref.reference.update("comments", FieldValue.arrayUnion(commentObject)).await()
                 async {
-                    retrieveComments(post.value)
+                    retrieveComments()
                     getFeedPosts(userData.value?.userId.toString())
-                }
+                }.await()
+                store.collection(POSTS).document(postref.reference.id).get().addOnSuccessListener {
+                    val r  = it.toObject(Posts::class.java)
+                    if(r!=null){
+                        post.value = r
+                        Log.d("CommentUpdate", "Updated post comments count: ${r.comments.size}")
 
+                    }
+                }
+                inProgress.value=false
             }
+            inProgress.value=false
         }
     }
 }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -106,8 +108,9 @@ fun SearchBar(searchKeyword: String, onValueChanged: (String) -> Unit, showResul
                 disabledIndicatorColor = Color.Transparent
             ),
             shape = RoundedCornerShape(20.dp), // Curved edges
-            modifier = Modifier.fillMaxWidth()
-        )
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            )
         if (showResults) {
             LinearProgressIndicator(
                 modifier = Modifier
@@ -146,7 +149,8 @@ fun ImageGrid(searchedPost: List<Posts>, navController: NavController, viewModel
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize().clickable {
                         viewModel.post.value = post as Posts?
-                        navController.navigate(route = "ViewPost")
+                        viewModel.retrieveComments()
+                            navController.navigate(route = "ViewPost")
                     }
                 )
             }

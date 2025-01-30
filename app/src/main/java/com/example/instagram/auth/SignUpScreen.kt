@@ -38,7 +38,6 @@ fun SignUpScreen(navController: NavController, viewModel: InstaViewModel) {
     val email = rememberSaveable { mutableStateOf("") }
     val password = rememberSaveable { mutableStateOf("") }
     val username = rememberSaveable { mutableStateOf("") }
-    val showPassword = rememberSaveable { mutableStateOf(false) }
     val signedIn = viewModel.signedIn.value
     LaunchedEffect(signedIn) {
         if (signedIn) {
@@ -74,7 +73,8 @@ fun SignUpScreen(navController: NavController, viewModel: InstaViewModel) {
                 onTextChanged = {
                     username.value = it },
                 // errorStatus = signupViewModel.registrationUIState.value.firstNameError
-                errorStatus = false
+                errorStatus = false,
+                singleline = true
             )
             Spacer(modifier = Modifier.height(10.dp))
 
@@ -84,7 +84,9 @@ fun SignUpScreen(navController: NavController, viewModel: InstaViewModel) {
                 onTextChanged = {
                     email.value = it },
                 // errorStatus = signupViewModel.registrationUIState.value.emailError
-                errorStatus = false
+                errorStatus = false,
+                singleline = true
+
             )
             Spacer(modifier = Modifier.height(10.dp))
 

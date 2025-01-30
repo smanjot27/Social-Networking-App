@@ -189,7 +189,7 @@ fun ProfileSection(currUser: User?) {
         Spacer(modifier = Modifier.height(8.dp))
         // Username
         Text(
-            text = if (currUser != null) currUser.userName else "",
+            text = if (currUser != null && currUser.Name!="null") currUser.Name ?: "" else "",
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp
         )
@@ -237,7 +237,7 @@ fun EditAndContactButtons(navController: NavController) {
         Button(
             onClick = { navController.navigate("EditProfile") },
             colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
-            shape = RoundedCornerShape(50),
+            shape = RoundedCornerShape(20),
             modifier = Modifier.weight(1f).padding(end = 8.dp)
         ) {
             Text(text = "Edit Profile")
@@ -283,6 +283,7 @@ fun ImageGrid(currUser: User?, viewModel: InstaViewModel, navController: NavCont
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize().clickable {
                             viewModel.post.value = post as Posts?
+                            viewModel.retrieveComments()
                             navController.navigate(route = "ViewPost")
                         }
                     )

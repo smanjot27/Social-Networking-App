@@ -19,4 +19,9 @@
     <string name="logout">Logout</string>
     <string name="menu">Menu</string>
     <string name="navigation_header">App Drawer</string>
+    <string name="user_name">UserName</string>
+    <string name="bio">Introduce yourself to the World!</string>
+    <string name="save">Save</string>
+    <string name="post">Add a Caption…</string>
+    <string name="comment">Add Comment...</string>
 </resources>

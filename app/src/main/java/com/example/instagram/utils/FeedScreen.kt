@@ -1,5 +1,6 @@
 package com.example.instagram.utils
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
 import androidx.activity.compose.BackHandler
@@ -52,6 +53,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,6 +65,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -198,6 +201,7 @@ fun FollowerList(followers: State<List<Pair<String, Boolean>>>) {
     }
 }
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavController,click :Boolean) {
@@ -222,7 +226,7 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
 
     val likeCount = remember { mutableStateOf(post.likes.size) }
     val likedByGesture = remember { mutableStateOf(false) }
-    val commentCount = remember { mutableStateOf(post.comments.size) }
+    val commentCount by derivedStateOf { post.comments.size }
 
 
     Column(
@@ -245,10 +249,10 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
                     contentDescription = "Profile Image",
                     modifier = Modifier
                         .size(40.dp).border(1.dp, Color.Gray, CircleShape).padding(2.dp)
-                        .clip(CircleShape)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.FillBounds
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = post.userName, fontWeight = FontWeight.Bold)
             } else {
                 Icon(
                     Icons.Default.Person,
@@ -269,6 +273,7 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
         }
         Box(modifier = Modifier.height(250.dp).fillMaxWidth().clickable{
             viewModel.post.value = post as Posts?
+            viewModel.retrieveComments()
             navController.navigate(route = "ViewPost")
         }) {
             // Post Image
@@ -336,6 +341,7 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
                         .clickable {
                             if(click==true) {
                                 viewModel.post.value = post as Posts?
+                                viewModel.retrieveComments()
                                 navController.navigate(route = "ViewPost")
                             }else null
                         },
@@ -359,7 +365,7 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
                     )
                 }) { targetValue ->
                     Text(
-                        "${targetValue.value}",
+                        "${targetValue}",
                         fontWeight = FontWeight.Bold, fontSize = 14.sp,
                         modifier = Modifier.padding(top = 5.dp)
                     )
