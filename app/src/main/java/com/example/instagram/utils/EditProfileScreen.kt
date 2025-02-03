@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -77,7 +78,8 @@ fun EditProfileScreen(navController: NavController, viewModel: InstaViewModel) {
     var username = rememberSaveable { mutableStateOf(user?.userName.toString()) }
     var bio = rememberSaveable { mutableStateOf(user?.BIO.toString()) }
     var image = remember { mutableStateOf(user?.image.toString()) }
-    val imageUri = remember { mutableStateOf<Uri?>(if(image.value!=null) Uri.parse(image.value) else null) }
+    val imageUri =
+        remember { mutableStateOf<Uri?>(if (image.value != null) Uri.parse(image.value) else null) }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -88,14 +90,25 @@ fun EditProfileScreen(navController: NavController, viewModel: InstaViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Profile", fontSize = 18.sp, fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        "Edit Profile",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.background,
                 ),
             )
         }
@@ -111,17 +124,21 @@ fun EditProfileScreen(navController: NavController, viewModel: InstaViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.padding(top = 16.dp)) {
-                    if (image.value!="null") {
+                Box(
+                    contentAlignment = Alignment.BottomEnd,
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    if (image.value != "null") {
                         AsyncImage(
                             model = getImage(), // Replace with the actual image URL
                             contentDescription = "Profile Picture",
                             modifier = Modifier
                                 .size(100.dp)
                                 .clip(CircleShape)
-                                .background(Color.LightGray).clickable { launcher.launch("image/*") },
+                                .background(Color.LightGray)
+                                .clickable { launcher.launch("image/*") },
                         )
-                    }else{
+                    } else {
                         IconButton(
                             onClick = { launcher.launch("image/*") },
                             Modifier
@@ -138,11 +155,16 @@ fun EditProfileScreen(navController: NavController, viewModel: InstaViewModel) {
                     IconButton(
                         onClick = { launcher.launch("image/*") },
                         modifier = Modifier
-                            .size(30.dp)
+                            .size(25.dp)
                             .clip(CircleShape)
-                            .background(Color.White)
+                            .background( if(isSystemInDarkTheme()) Color.Black else Color.White)
                     ) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit", tint = Color.Black, modifier = Modifier.align(Alignment.TopStart))
+                        Icon(
+                            Icons.Filled.Edit,
+                            contentDescription = "Edit",
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.align(Alignment.TopStart)
+                        )
                     }
                 }
             }
@@ -173,7 +195,8 @@ fun EditProfileScreen(navController: NavController, viewModel: InstaViewModel) {
                         .fillMaxHeight(0.5f)
                         .border(
                             BorderStroke(1.dp, Color.LightGray),
-                            shape = RoundedCornerShape(20.dp)),
+                            shape = RoundedCornerShape(20.dp)
+                        ),
                     label = { Text(text = stringResource(R.string.bio)) },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color.Transparent,
@@ -184,7 +207,7 @@ fun EditProfileScreen(navController: NavController, viewModel: InstaViewModel) {
                     ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     value = if (bio.value != "null") bio.value else "",
-                    onValueChange =   { bio.value = it },
+                    onValueChange = { bio.value = it },
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -196,7 +219,8 @@ fun EditProfileScreen(navController: NavController, viewModel: InstaViewModel) {
                     bio.value,
                     image.value
                 )
-                navController.popBackStack()})
+                navController.popBackStack()
+            })
         }
     }
     val loading = viewModel.inProgress.value

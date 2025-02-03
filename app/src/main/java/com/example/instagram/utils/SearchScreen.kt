@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -105,7 +106,8 @@ fun SearchBar(searchKeyword: String, onValueChanged: (String) -> Unit, showResul
                 containerColor = Color(0xFFF2F2F2), // Light gray background
                 focusedIndicatorColor = Color.Transparent, // Removes underline
                 unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
+                disabledIndicatorColor = Color.Transparent,
+                focusedTextColor = Color.Black
             ),
             shape = RoundedCornerShape(20.dp), // Curved edges
             modifier = Modifier.fillMaxWidth(),
@@ -116,7 +118,7 @@ fun SearchBar(searchKeyword: String, onValueChanged: (String) -> Unit, showResul
                 modifier = Modifier
                     .fillMaxWidth().height(2.dp)
                     .padding(horizontal = 16.dp),
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
     }

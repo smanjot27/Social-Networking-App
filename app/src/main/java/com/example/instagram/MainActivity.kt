@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.instagram.auth.SignInScreen
 import com.example.instagram.auth.SignUpScreen
+import com.example.instagram.ui.theme.InstagramTheme
 import com.example.instagram.utils.CommentScreen
 import com.example.instagram.utils.CreatePostScreen
 import com.example.instagram.utils.EditProfileScreen
@@ -30,7 +31,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            InstaApp()
+            InstagramTheme {
+                InstaApp()
+            }
         }
     }
 }

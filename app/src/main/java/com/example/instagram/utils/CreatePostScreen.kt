@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -64,11 +65,24 @@ fun CreatePostScreen(navController: NavController,viewModel: InstaViewModel){
     val image = remember { mutableStateOf("") }
     val imageUri = remember { mutableStateOf<Uri?>(if(image.value!=null) Uri.parse(image.value) else null) }
     var selectedItem by remember { mutableStateOf("CreatePost") }
+    val isDarkTheme = isSystemInDarkTheme()
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         imageUri.value = uri
         image.value = uri.toString()
+    }
+
+    val gradientColors = if (isDarkTheme) {
+        listOf(
+            Color(0xFF1e1e1e), // Dark gray for dark mode
+            Color(0xFF121212)  // Almost black
+        )
+    } else {
+        listOf(
+            Color(0xFFe2d1c3), // Light brown for light mode
+            Color(0xFFfdfcfb)  // Light cream
+        )
     }
 
     Scaffold(
@@ -83,12 +97,8 @@ fun CreatePostScreen(navController: NavController,viewModel: InstaViewModel){
     ) {it
         Column(Modifier.fillMaxSize().padding(it).background(
             Brush.radialGradient(
-                colors = listOf(
-                    Color(0xFFe2d1c3),
-                    Color(0xFFfdfcfb),
-                ),
+                colors =  gradientColors,
                 radius = 300f
-
             )),
             horizontalAlignment = Alignment.CenterHorizontally){
             if (image.value!="") {
@@ -124,19 +134,17 @@ fun CreatePostScreen(navController: NavController,viewModel: InstaViewModel){
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .fillMaxHeight(0.2f),
-                label = { Text(text = stringResource(R.string.post)) },
+                label = { Text(text = stringResource(R.string.post),color = MaterialTheme.colorScheme.onSurface) },
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent
                 ),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 value = caption.value,
                 onValueChange =   { caption.value = it },
             )
-            Spacer(Modifier.fillMaxWidth(0.9f).height(1.dp).border(BorderStroke(1.dp,Color.LightGray)))
+            Spacer(Modifier.fillMaxWidth(0.9f).height(1.dp).border(BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground)))
             Spacer(modifier = Modifier.height(20.dp))
             //Save btn
             ButtonComponent(stringResource(R.string.save), onButtonClicked = {

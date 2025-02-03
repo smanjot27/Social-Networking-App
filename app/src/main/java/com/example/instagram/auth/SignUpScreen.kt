@@ -2,6 +2,7 @@ package com.example.instagram.auth
 
 import CurvedHangingImages
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +36,7 @@ import com.example.instagram.utils.TextFieldComponent
 @Composable
 fun SignUpScreen(navController: NavController, viewModel: InstaViewModel) {
 
+    val isDarkTheme = isSystemInDarkTheme() // Detect current theme
 
     val email = rememberSaveable { mutableStateOf("") }
     val password = rememberSaveable { mutableStateOf("") }
@@ -46,15 +49,22 @@ fun SignUpScreen(navController: NavController, viewModel: InstaViewModel) {
             }
         }
     }
-
+    val gradientColors = if (isDarkTheme) {
+        listOf(
+            Color(0xFF1e1e1e), // Dark gray for dark mode
+            Color(0xFF121212)  // Almost black
+        )
+    } else {
+        listOf(
+            Color(0xFFe2d1c3), // Light brown for light mode
+            Color(0xFFfdfcfb)  // Light cream
+        )
+    }
     Box(
         modifier = Modifier.fillMaxSize()
             .background(
                 Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFFe2d1c3),
-                        Color(0xFFfdfcfb),
-                    ),
+                    colors = gradientColors,
                     radius = 300f // Small radius for the inner color
                 ))
     ) {

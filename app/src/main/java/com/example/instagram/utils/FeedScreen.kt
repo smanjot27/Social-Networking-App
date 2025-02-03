@@ -19,6 +19,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -63,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -78,6 +81,7 @@ import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.instagram.InstaViewModel
 import com.example.instagram.data.Posts
+import com.example.instagram.ui.theme.lightGray
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -90,6 +94,7 @@ fun FeedScreen(navController: NavController, viewModel: InstaViewModel) {
     viewModel.getFeedPosts(viewModel.userData.value?.userId.toString())
     val followingData = viewModel.followingDetails.collectAsState()
     val feedPosts = viewModel.feedPosts.value
+    val darkTheme = isSystemInDarkTheme()
 
     Log.d("FollowingDetails", "followingDetails: $followingData")
 
@@ -115,7 +120,7 @@ fun FeedScreen(navController: NavController, viewModel: InstaViewModel) {
                 navController.navigate(route = it)
             })
         },
-        containerColor = Color(0xFFF7F7F7)
+        containerColor = if(darkTheme) Color.Black else lightGray
     ) { it ->
         LazyColumn(
             Modifier
@@ -132,34 +137,13 @@ fun FeedScreen(navController: NavController, viewModel: InstaViewModel) {
             }
             //  Post List
             items(feedPosts.size) { post ->
-                PostCard(feedPosts[post], viewModel, navController,true)
+                PostCard(feedPosts[post], viewModel, navController, true)
             }
         }
 
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBar(text:String) {
-    TopAppBar(
-        title = {
-            Text(
-                text,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-        },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = Color.White,
-            contentColorFor(Color.Black)
-        ),
-        windowInsets = WindowInsets.statusBars,
-        modifier = Modifier.clip(RoundedCornerShape(20.dp))
-    )
-}
 
 @Composable
 fun FollowerList(followers: State<List<Pair<String, Boolean>>>) {
@@ -178,7 +162,7 @@ fun FollowerList(followers: State<List<Pair<String, Boolean>>>) {
                         modifier = Modifier
                             .size(70.dp)
                             .clip(CircleShape)
-                            .border(3.dp, Color.Gray, CircleShape).padding(3.dp)
+                            .border(3.dp, brush = getStoryBrush(), CircleShape).padding(3.dp)
                     )
                 } else {
                     Icon(
@@ -187,14 +171,15 @@ fun FollowerList(followers: State<List<Pair<String, Boolean>>>) {
                         modifier = Modifier
                             .size(70.dp)
                             .clip(CircleShape)
-                            .border(3.dp, Color.Gray, CircleShape).padding(3.dp),
-                        tint = Color.Black
+                            .border(3.dp, getStoryBrush(), CircleShape).padding(3.dp)
+                            .background(MaterialTheme.colorScheme.background),
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
                 Text(
                     text = followers.value[follower].first,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -204,7 +189,7 @@ fun FollowerList(followers: State<List<Pair<String, Boolean>>>) {
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavController,click :Boolean) {
+fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavController, click: Boolean) {
     val coroutine = rememberCoroutineScope()
 
     val isFavourite = remember {
@@ -217,7 +202,7 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
 
     val color = animateColorAsState(
         targetValue = if (isFavourite.value)
-            Color.Red else Color.Black,
+            Color.Red else MaterialTheme.colorScheme.onBackground,
         animationSpec = tween(
             durationMillis = 500, // Animation duration
             // Custom easing
@@ -234,10 +219,10 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
             .fillMaxWidth()
             .padding(8.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White),
+            .background(color = MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Bottom,
 
-    ) {
+        ) {
         // User Info (Profile Image + Name)
         Row(
             modifier = Modifier.padding(8.dp),
@@ -248,7 +233,7 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
                     model = getImage(),
                     contentDescription = "Profile Image",
                     modifier = Modifier
-                        .size(40.dp).border(1.dp, Color.Gray, CircleShape).padding(2.dp)
+                        .size(40.dp).border(1.dp, getStoryBrush(), CircleShape).padding(2.dp)
                         .clip(CircleShape),
                     contentScale = ContentScale.FillBounds
                 )
@@ -258,9 +243,10 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
                     Icons.Default.Person,
                     contentDescription = "",
                     modifier = Modifier
-                        .size(40.dp).border(1.dp, Color.Gray, CircleShape).padding(2.dp)
+                        .size(40.dp).border(1.dp, getStoryBrush(), CircleShape).padding(2.dp)
+                        .background(MaterialTheme.colorScheme.background)
                         .clip(CircleShape),
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -268,10 +254,10 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
             Text(
                 text = post.userName,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                fontSize = 16.sp, color = MaterialTheme.colorScheme.onBackground,
             )
         }
-        Box(modifier = Modifier.height(250.dp).fillMaxWidth().clickable{
+        Box(modifier = Modifier.height(250.dp).fillMaxWidth().clickable {
             viewModel.post.value = post as Posts?
             viewModel.retrieveComments()
             navController.navigate(route = "ViewPost")
@@ -337,20 +323,20 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
                     modifier = Modifier
                         .size(30.dp)
                         .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.5f))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .clickable {
-                            if(click==true) {
+                            if (click == true) {
                                 viewModel.post.value = post as Posts?
                                 viewModel.retrieveComments()
                                 navController.navigate(route = "ViewPost")
-                            }else null
+                            } else null
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.ChatBubbleOutline,
                         contentDescription = "Comment",
-                        tint = Color.Black,
+                        tint = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.size(15.dp)
                     )
                 }
@@ -366,8 +352,10 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
                 }) { targetValue ->
                     Text(
                         "${targetValue}",
-                        fontWeight = FontWeight.Bold, fontSize = 14.sp,
-                        modifier = Modifier.padding(top = 5.dp)
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(top = 5.dp),
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                 }
 
@@ -385,7 +373,7 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
                         modifier = Modifier
                             .size(30.dp)
                             .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.5f))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .clickable {
                                 if (!targetValue.value) {
                                     viewModel.likePost(post)
@@ -423,8 +411,9 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
                     Text(
                         "${targetValue.value}",
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.SansSerif ,// Ensures italic support
+                        fontFamily = FontFamily.SansSerif,// Ensures italic support
                         fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier.padding(top = 5.dp)
                     )
                 }
@@ -435,9 +424,10 @@ fun PostCard(post: Posts, viewModel: InstaViewModel, navController: NavControlle
         Text(
             text = post.caption,
             fontSize = 14.sp,
-            fontFamily = FontFamily.Serif ,// Ensures italic support
+            fontFamily = FontFamily.Serif,// Ensures italic support
             fontStyle = FontStyle.Italic,
-            modifier = Modifier.padding(10.dp) // Padding inside the box
+            modifier = Modifier.padding(10.dp),
+            color = MaterialTheme.colorScheme.onBackground // Padding inside the box
         )
 
     }

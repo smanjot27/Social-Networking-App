@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -58,12 +60,15 @@ import com.example.instagram.InstaViewModel
 import com.example.instagram.R
 import com.example.instagram.data.Posts
 import com.example.instagram.data.User
+import com.example.instagram.ui.theme.lightGray
 import kotlinx.coroutines.delay
 
 @Composable
 fun MyPostScreen(navController: NavController, viewModel: InstaViewModel) {
     var selectedItem by remember { mutableStateOf("Posts") }
     val currUser = viewModel.userData.value
+    val darkTheme = isSystemInDarkTheme()
+
 
     Log.i("Instagram check", "$currUser")
 
@@ -76,15 +81,15 @@ fun MyPostScreen(navController: NavController, viewModel: InstaViewModel) {
                 selectedItem = it
                 navController.navigate(route = it)
             })
-        },        containerColor = Color(0xFFF7F7F7)
-
+        },
+        containerColor = if(darkTheme) Color.Black else lightGray
     ) { paddingValues ->
         if (!viewModel.inProgress.value) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.background)
             ) {
                 // Profile Section
                 ProfileSection(currUser)
@@ -114,12 +119,13 @@ fun ProfileTopBar(currUser: User?, viewModel: InstaViewModel) {
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onBackground
             )
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = Color.White,
-            contentColorFor(Color.Black)
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColorFor(MaterialTheme.colorScheme.onBackground)
         ),
         windowInsets = WindowInsets.statusBars,
         actions = {
@@ -131,11 +137,10 @@ fun ProfileTopBar(currUser: User?, viewModel: InstaViewModel) {
                 Icon(
                     Icons.Filled.Logout,
                     contentDescription = "",
-                    tint = Color.Black,
+                    tint = MaterialTheme.colorScheme.onBackground,
                 )
             }
         },
-        modifier = Modifier.clip(RoundedCornerShape(20.dp))
     )
 }
 
@@ -149,9 +154,8 @@ fun ProfileSection(currUser: User?) {
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = Modifier.padding(16.dp)
+            .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Profile Picture
@@ -162,7 +166,7 @@ fun ProfileSection(currUser: User?) {
                     contentDescription = "Profile Picture",
                     modifier = Modifier
                         .size(80.dp)
-                        .clip(CircleShape).border(3.dp, Color.Gray, CircleShape).padding(3.dp),
+                        .clip(CircleShape).border(3.dp, getStoryBrush(), CircleShape).padding(3.dp),
                     contentScale = ContentScale.Crop
                 )
             } else {
@@ -170,8 +174,8 @@ fun ProfileSection(currUser: User?) {
                     Icons.Default.Person,
                     contentDescription = "",
                     modifier = Modifier.size(80.dp).clip(CircleShape)
-                        .border(3.dp, Color.Gray, CircleShape).padding(3.dp),
-                    tint = Color.Black
+                        .border(3.dp, getStoryBrush(), CircleShape).padding(3.dp),
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
         } else {
@@ -191,7 +195,8 @@ fun ProfileSection(currUser: User?) {
         Text(
             text = if (currUser != null && currUser.Name!="null") currUser.Name ?: "" else "",
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
+            fontSize = 20.sp,
+            color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(4.dp))
         // Bio
@@ -211,14 +216,16 @@ fun ProfileSection(currUser: User?) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "${if (currUser?.Following != null) currUser.Following?.size?.minus(1)  else 0}",
-                    fontWeight = FontWeight.Bold, fontSize = 16.sp
+                    fontWeight = FontWeight.Bold, fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(text = "Following", fontSize = 14.sp, color = Color.Gray)
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = "${if (currUser?.Followers != null) currUser.Followers?.size else 0}",
-                    fontWeight = FontWeight.Bold, fontSize = 16.sp
+                    fontWeight = FontWeight.Bold, fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(text = "Followers", fontSize = 14.sp, color = Color.Gray)
             }
@@ -236,11 +243,13 @@ fun EditAndContactButtons(navController: NavController) {
     ) {
         Button(
             onClick = { navController.navigate("EditProfile") },
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onBackground),
             shape = RoundedCornerShape(20),
             modifier = Modifier.weight(1f).padding(end = 8.dp)
         ) {
-            Text(text = "Edit Profile")
+            Text(text = "Edit Profile",
+                color = MaterialTheme.colorScheme.background
+            )
         }
 //        Button(
 //            onClick = { /*TODO*/ },

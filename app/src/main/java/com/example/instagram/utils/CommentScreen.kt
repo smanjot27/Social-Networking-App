@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,7 +44,7 @@ fun CommentScreen(navController: NavController, viewModel: InstaViewModel) {
     val focusManager = LocalFocusManager.current
     Column(
         Modifier
-            .fillMaxWidth(0.95f).background(Color.White),
+            .fillMaxWidth(0.95f),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (!viewModel.inProgress.value) {
@@ -54,74 +55,27 @@ fun CommentScreen(navController: NavController, viewModel: InstaViewModel) {
             ) {
                 items(comments.size) { idx ->
                    showComment(comments[idx])
-                    /*Row(modifier = Modifier.padding(8.dp)) {
-                        //USERNAME
-                        Text(
-                            text = comment.userName,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
-                        //CAPTION
-                        Text(
-                            text = comment.comment,
-                            modifier = Modifier
-                                .fillMaxWidth(0.6f)
-                                .padding(start = 8.dp),
-                            fontSize = 14.sp,
-                            style = TextStyle.Default
-                        )
-                    }
-                    Spacer(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .border(1.dp, colorResource(R.color.light_gray))
-                    )*/
+
                 }
             }
         } else {
             Spinner()
         }
-        /*OutlinedTextField(
-            value = commentValue.value,
-            onValueChange = { commentValue.value = it },
-            label = { Text("Add Comment", color = Color.Gray) },
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.Transparent,
-                focusedTextColor = Color.Black,
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    focusManager.clearFocus() // Clears focus to hide the keyboard
-                }
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .imePadding(),
-            trailingIcon = {
-                IconButton(onClick = {
-                    viewModel.addComment(post, commentValue.value, LocalDateTime.now())
-                    focusManager.clearFocus()
-                    commentValue.value = ""
-                }) {
-                    Icon(Icons.Default.Send, contentDescription = "")
-                }
-            }
-        )*/
+
         OutlinedTextField(
-            modifier = Modifier
+            modifier = Modifier.padding(vertical = 5.dp)
                 .height(58.dp).fillMaxWidth()
                 .border(
                     BorderStroke(1.dp, Color.LightGray),
                     shape = RoundedCornerShape(20.dp)
                 ),
-            label = { Text(text = stringResource(R.string.comment)) },
+            label = { Text(text = stringResource(R.string.comment),color = MaterialTheme.colorScheme.onSurface) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
                 cursorColor = MaterialTheme.colorScheme.primary,
-                focusedContainerColor = Color.Transparent,
-                unfocusedContainerColor = Color.Transparent
+                focusedContainerColor = MaterialTheme.colorScheme.background,
+                unfocusedContainerColor = MaterialTheme.colorScheme.background
             ),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             value = commentValue.value,
