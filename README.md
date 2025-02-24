@@ -26,19 +26,31 @@ Challenges & Solutions
 
 Screenshots  
 
-![image](https://github.com/user-attachments/assets/8b86e9cd-41a1-4f0f-b1ab-b6927395510e)
+Register User
 
-![image](https://github.com/user-attachments/assets/1fde697a-1a1b-42cc-a6f4-5014a8359e4d)
+  ![image](https://github.com/user-attachments/assets/8b86e9cd-41a1-4f0f-b1ab-b6927395510e)
+
+User Profile in Light Mode
+
+  ![image](https://github.com/user-attachments/assets/1fde697a-1a1b-42cc-a6f4-5014a8359e4d)
+
+User Profile in Dark Mode
 
 ![image](https://github.com/user-attachments/assets/7ed02c29-6130-4ab4-9dae-1ecbf0dd98c1)
 
+Edit Profile
+
 ![image](https://github.com/user-attachments/assets/f2d07e6b-6333-4a81-8041-fa63632479e9)
+
+Single Post Screen with Comments
 
 ![image](https://github.com/user-attachments/assets/3811d401-8ad1-4909-95c0-7a3a322a6e0a)
 
+Feed Screen with iconic "Double Tap" Gesture
+
 ![image](https://github.com/user-attachments/assets/5371e6ee-4c10-4c7b-8f10-d7dfb125dec5)
 
-![image](https://github.com/user-attachments/assets/e71ebd48-9a0e-4297-8394-481bc99aa6b2)
+Login Screen
 
 ![image](https://github.com/user-attachments/assets/a4d4fbb8-b5e4-44ce-b879-783c53be43fb)
 
